@@ -64,6 +64,7 @@ model StudyMaterial {
   
   decks         Deck[]
   quizzes       Quiz[]
+  chatMessages  ChatMessage[]
   
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -119,4 +120,14 @@ model QuizQuestion {
   options       String[] // JSON array of options
   correctAnswer String
   explanation   String?
+}
+model ChatMessage {
+  id            String         @id @default(uuid())
+  materialId    String
+  material      StudyMaterial  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  
+  role          String         // "user" or "bot"
+  content       String
+  
+  createdAt     DateTime       @default(now())
 }

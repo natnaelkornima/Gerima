@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from utils.text_extractor import extract_text_from_pdf_url
-from utils.ai_engine import generate_study_materials
+from utils.ai_engine import generate_study_materials, generate_chat_response
 import uvicorn
 import json
 
@@ -11,6 +11,12 @@ class ProcessRequest(BaseModel):
     file_url: str
     file_type: str
     generate_type: str = "all" # summary, quiz, flashcards, or all
+
+class ChatRequest(BaseModel):
+    file_url: str
+    file_type: str
+    message: str
+    history: list = []
 
 @app.get("/")
 def health_check():
@@ -22,7 +28,6 @@ def process_file(request: ProcessRequest):
     Receives a file URL, downloads it, extracts text, and generates requested study material.
     """
     print(f"Processing mission: {request.generate_type} for {request.file_url}")
-    
     try:
         content = ""
         if request.file_type == "PDF":
@@ -33,8 +38,6 @@ def process_file(request: ProcessRequest):
         if not content:
              return {"status": "error", "message": "No text extracted from file. The PDF might be scanned or empty."}
 
-        print(f"Extracted {len(content)} chars. Mission: {request.generate_type}")
-        
         # Call AI Engine
         try:
             ai_response_json_str = generate_study_materials(content, request.generate_type)
@@ -45,8 +48,6 @@ def process_file(request: ProcessRequest):
         try:
             ai_data = json.loads(ai_response_json_str)
         except json.JSONDecodeError:
-            print("Failed to parse JSON from AI.")
-            # Fallback for summary
             ai_data = {"summary": ai_response_json_str, "error": "JSON_PARSE_ERROR"}
 
         return {
@@ -58,9 +59,31 @@ def process_file(request: ProcessRequest):
         print(f"Server Error: {e}")
         return {"status": "error", "message": str(e)}
 
+@app.post("/chat")
+def chat_with_doc(request: ChatRequest):
+    """
+    Handles conversational tutoring based on document content.
+    """
+    print(f"Chat request for: {request.file_url}")
+    try:
+        content = ""
+        if request.file_type == "PDF":
+            content = extract_text_from_pdf_url(request.file_url)
+        else:
+            return {"status": "error", "message": "File type not supported for chat yet."}
+            
+        if not content:
+            return {"status": "error", "message": "Could not read document content."}
+
+        response_text = generate_chat_response(content, request.message, request.history)
+        
+        return {
+            "status": "success",
+            "response": response_text
+        }
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Chat Server Error: {e}")
+        return {"status": "error", "message": str(e)}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

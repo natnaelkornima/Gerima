@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { PrismaClient } from "@prisma/client"
 import Link from "next/link"
-import { FileText, FileAudio, FileImage, Presentation } from "lucide-react"
+import { FileText, FileAudio, FileImage, Presentation, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DeleteMaterialButton } from "@/components/delete-material-button"
 
@@ -72,13 +72,21 @@ export default async function LibraryPage() {
                                 <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
                                     {material.summary?.substring(0, 100) || "Processing..."}
                                 </p>
-                                <div className="flex gap-2 mt-4 text-xs">
-                                    <span className="px-2 py-1 bg-secondary rounded-full">
-                                        {material.quizzes.length} Quiz{material.quizzes.length !== 1 ? "zes" : ""}
-                                    </span>
-                                    <span className="px-2 py-1 bg-secondary rounded-full">
-                                        {material.decks.length} Deck{material.decks.length !== 1 ? "s" : ""}
-                                    </span>
+                                <div className="flex items-center justify-between mt-4">
+                                    <div className="flex gap-2 text-xs">
+                                        <span className="px-2 py-1 bg-secondary rounded-full">
+                                            {material.quizzes.length} Quiz{material.quizzes.length !== 1 ? "zes" : ""}
+                                        </span>
+                                        <span className="px-2 py-1 bg-secondary rounded-full">
+                                            {material.decks.length} Deck{material.decks.length !== 1 ? "s" : ""}
+                                        </span>
+                                    </div>
+                                    <Link href={`/dashboard/tutor?doc=${material.id}`} onClick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="sm" className="h-8 gap-2 text-primary hover:text-primary hover:bg-primary/10">
+                                            <MessageSquare className="h-3.5 w-3.5" />
+                                            Chat
+                                        </Button>
+                                    </Link>
                                 </div>
                             </div>
                         </Link>

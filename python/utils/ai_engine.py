@@ -60,3 +60,49 @@ def generate_study_materials(text: str, generate_type: str = "all"):
     except Exception as e:
         print(f"Gemini API Error details: {e}")
         raise e
+def generate_chat_response(document_text: str, user_message: str, history: list = []):
+    """
+    Answers a user message based on the document context and conversation history.
+    """
+    print(f"Generating chat response (History length: {len(history)})...")
+    
+    # System Instruction
+    system_instruction = f"""
+    You are 'Gerima AI', a friendly and highly knowledgeable AI Tutor.
+    Your goal is to help students understand their study materials.
+    
+    GUIDELINES:
+    1. Base your answers strictly on the PROVIDED TEXT if it contains the answer.
+    2. If the text doesn't contain the answer, use your general knowledge but mention it's not in the doc.
+    3. Keep responses helpful, educational, and concise.
+    4. You can use markdown for formatting (bold, lists, etc).
+    5. Be encouraging!
+    
+    DOCUMENT CONTEXT:
+    {document_text[:50000]} # Gemini 1.5 Flash has a massive window, 50k is safe.
+    """
+
+    # We could use genai.ChatSession, but for one-off API calls with history, 
+    # we can just construct a message list.
+    
+    messages = [
+        {"role": "user", "parts": [system_instruction]},
+        {"role": "model", "parts": ["Understood. I have read the document and am ready to help the student as Gerima AI!"]}
+    ]
+    
+    # Add history
+    for msg in history:
+        messages.append({
+            "role": "user" if msg["role"] == "user" else "model",
+            "parts": [msg["content"]]
+        })
+        
+    # Add new message
+    messages.append({"role": "user", "parts": [user_message]})
+    
+    try:
+        response = model.generate_content(messages)
+        return response.text
+    except Exception as e:
+        print(f"Chat API Error: {e}")
+        raise e

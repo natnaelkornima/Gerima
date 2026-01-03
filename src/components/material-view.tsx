@@ -9,6 +9,8 @@ import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { DeleteMaterialButton } from "@/components/delete-material-button"
+import { ChatTutor } from "@/components/chat-tutor"
+import { MessageSquare } from "lucide-react"
 
 interface MaterialViewProps {
     material: {
@@ -97,7 +99,7 @@ export function MaterialView({ material, flashcards: initialFlashcards, quizQues
             <Tabs defaultValue="summary" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="summary">Summary</TabsTrigger>
-                    <TabsTrigger value="flashcards">Flashcards {flashcards.length > 0 && `(${flashcards.length})`}</TabsTrigger>
+                    <TabsTrigger value="flashcards">Cards {flashcards.length > 0 && `(${flashcards.length})`}</TabsTrigger>
                     <TabsTrigger value="quiz">Quiz {quizQuestions.length > 0 && `(${quizQuestions.length})`}</TabsTrigger>
                 </TabsList>
 
