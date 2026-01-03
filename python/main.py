@@ -39,13 +39,18 @@ def process_file(request: ProcessRequest):
         
         # Call AI Engine
         ai_response_json_str = generate_study_materials(content)
+        print(f"DEBUG: AI Response: {ai_response_json_str[:500]}...")
         
         # Parse JSON
         try:
             ai_data = json.loads(ai_response_json_str)
         except json.JSONDecodeError:
-            print("Failed to parse JSON from AI. Returning raw text.")
-            ai_data = {"raw_response": ai_response_json_str}
+            print("Failed to parse JSON from AI. Wrapping raw response.")
+            ai_data = {
+                "summary": ai_response_json_str[:500],
+                "quiz": [],
+                "flashcards": []
+            }
 
         return {
             "status": "success",

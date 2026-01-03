@@ -104,14 +104,16 @@ export async function POST(req: NextRequest) {
             });
 
             if (!aiResponse.ok) {
-                console.error("AI Service failed", await aiResponse.text());
-                // Non-blocking for the UI, but we log it. 
-                // In a real app, maybe use a background job queue (BullMQ/Inngest)
+                const errorText = await aiResponse.text();
+                console.error("[UPLOAD] AI Service failed:", aiResponse.status, errorText);
             } else {
                 const aiResult = await aiResponse.json();
+                console.log("[UPLOAD] AI Result received:", JSON.stringify(aiResult).substring(0, 500));
+
                 const aiData = aiResult.ai_data;
 
                 if (aiData) {
+                    console.log("[UPLOAD] Persisting AI Data to DB...");
                     // Update Material with Summary
                     await prisma.studyMaterial.update({
                         where: { id: studyMaterial.id },
@@ -119,6 +121,7 @@ export async function POST(req: NextRequest) {
                             summary: aiData.summary,
                         }
                     });
+                    console.log("[UPLOAD] Summary updated.");
 
                     // Create Flashcards Deck
                     if (aiData.flashcards && aiData.flashcards.length > 0) {
