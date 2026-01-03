@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client"
 import Link from "next/link"
 import { FileText, FileAudio, FileImage, Presentation } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DeleteMaterialButton } from "@/components/delete-material-button"
 
 const prisma = new PrismaClient()
 
@@ -55,10 +56,15 @@ export default async function LibraryPage() {
                         <Link key={material.id} href={`/dashboard/library/${material.id}`}>
                             <div className="group p-6 border rounded-xl bg-card hover:border-primary transition-colors cursor-pointer h-full flex flex-col">
                                 <div className="flex items-start justify-between mb-4">
-                                    {typeIcons[material.type] || <FileText className="h-8 w-8" />}
-                                    <span className="text-xs text-muted-foreground" suppressHydrationWarning>
-                                        {new Date(material.createdAt).toLocaleDateString("en-US")}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        {typeIcons[material.type] || <FileText className="h-8 w-8" />}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-muted-foreground mr-2" suppressHydrationWarning>
+                                            {new Date(material.createdAt).toLocaleDateString("en-US")}
+                                        </span>
+                                        <DeleteMaterialButton id={material.id} title={material.title} />
+                                    </div>
                                 </div>
                                 <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                                     {material.title}

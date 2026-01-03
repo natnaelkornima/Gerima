@@ -8,6 +8,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { DeleteMaterialButton } from "@/components/delete-material-button"
 
 interface MaterialViewProps {
     material: {
@@ -76,18 +77,21 @@ export function MaterialView({ material, flashcards: initialFlashcards, quizQues
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Link href="/dashboard/library">
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{material.title}</h1>
-                    <p className="text-sm text-muted-foreground" suppressHydrationWarning>
-                        {material.type} • {new Date(material.createdAt).toLocaleDateString("en-US")}
-                    </p>
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <Link href="/dashboard/library">
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">{material.title}</h1>
+                        <p className="text-sm text-muted-foreground" suppressHydrationWarning>
+                            {material.type} • {new Date(material.createdAt).toLocaleDateString("en-US")}
+                        </p>
+                    </div>
                 </div>
+                <DeleteMaterialButton id={material.id} title={material.title} variant="full" />
             </div>
 
             <Tabs defaultValue="summary" className="w-full">
