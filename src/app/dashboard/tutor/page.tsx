@@ -1,12 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
-import { PrismaClient } from "@prisma/client"
+import prisma from "@/lib/prisma"
 import { Bot, GraduationCap } from "lucide-react"
 import { ChatTutor } from "@/components/chat-tutor"
 import { TutorSelector } from "@/components/tutor-selector"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-
-const prisma = new PrismaClient()
 
 export default async function TutorPage({
     searchParams

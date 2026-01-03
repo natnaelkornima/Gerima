@@ -1,9 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
-import { PrismaClient } from "@prisma/client"
+import prisma from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { MaterialView } from "@/components/material-view"
-
-const prisma = new PrismaClient()
 
 interface PageProps {
     params: Promise<{ id: string }>
