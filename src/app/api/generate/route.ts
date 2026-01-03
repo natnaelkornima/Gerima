@@ -14,8 +14,8 @@ export async function POST(req: Request) {
             data: {
                 title,
                 type,
-                content,
-                userId,
+                transcription: content,
+                userId: userId
             },
         })
 

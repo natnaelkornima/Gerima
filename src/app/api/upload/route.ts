@@ -22,7 +22,7 @@ export async function POST(req: Request) {
             data: {
                 title,
                 type,
-                content,
+                transcription: content,
                 summary,
                 userId: user.id
             }
