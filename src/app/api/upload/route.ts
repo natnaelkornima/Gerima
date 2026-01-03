@@ -1,19 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createRouteClient } from "@/lib/supabase/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
     try {
-        const supabase = await createClient();
+        console.log("[UPLOAD] Starting upload handler...");
+        const { supabase } = createRouteClient(req);
 
         // 1. Authenticate User
         const {
             data: { user },
         } = await supabase.auth.getUser();
 
+        console.log("[UPLOAD] User:", user?.id || "NO USER");
+
         if (!user) {
+            console.log("[UPLOAD] ERROR: Unauthorized");
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -25,11 +29,14 @@ export async function POST(req: NextRequest) {
         const file = formData.get("file") as File;
 
         if (!file) {
+            console.log("[UPLOAD] ERROR: No file");
             return NextResponse.json(
                 { error: "No file uploaded" },
                 { status: 400 }
             );
         }
+
+        console.log("[UPLOAD] File:", file.name, file.type);
 
         // 3. Upload to Supabase Storage
         const fileExt = file.name.split('.').pop();
@@ -39,12 +46,14 @@ export async function POST(req: NextRequest) {
             .upload(fileName, file);
 
         if (uploadError) {
-            console.error("Storage Error:", uploadError);
+            console.error("[UPLOAD] Storage Error:", uploadError);
             return NextResponse.json(
-                { error: "Failed to upload file to storage" },
+                { error: "Failed to upload file to storage: " + uploadError.message },
                 { status: 500 }
             );
         }
+
+        console.log("[UPLOAD] Storage upload success:", fileName);
 
         // 4. Get Public/Signed URL (Assuming public for now, or signed later)
         // For RAG, we need server-side access mostly.
@@ -52,10 +61,13 @@ export async function POST(req: NextRequest) {
             .from("materials")
             .getPublicUrl(fileName);
 
+        console.log("[UPLOAD] Public URL:", publicUrl);
+
         // 5. Save Metadata to Prisma
         // First ensure User exists in Prisma (sync from Auth if needed, usually via hooks, but lazy create here for safety)
         let dbUser = await prisma.user.findUnique({ where: { id: user.id } });
         if (!dbUser) {
+            console.log("[UPLOAD] Creating new DB user...");
             dbUser = await prisma.user.create({
                 data: {
                     id: user.id,
@@ -75,6 +87,8 @@ export async function POST(req: NextRequest) {
                 language: "en", // Default, detect later
             },
         });
+
+        console.log("[UPLOAD] StudyMaterial created:", studyMaterial.id);
 
         // 6. Trigger AI Processing (Python Microservice) and Persist Data
         try {
