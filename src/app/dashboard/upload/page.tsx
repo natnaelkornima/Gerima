@@ -1,12 +1,37 @@
 "use client"
 import { FileUpload } from "@/components/file-upload"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export default function UploadPage() {
+    const router = useRouter()
 
     const handleUpload = async (files: File[]) => {
-        // TODO: Implement actual Supabase upload
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        console.log("Uploaded files:", files)
+        try {
+            for (const file of files) {
+                // Check if user is logged in first (client side check)
+                // In a real app, middleware handles protection, but we want to be safe
+                const formData = new FormData()
+                formData.append("file", file)
+
+                const response = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                })
+
+                if (!response.ok) {
+                    const error = await response.json()
+                    throw new Error(error.error || "Upload failed")
+                }
+            }
+
+            toast.success("Materials uploaded successfully!")
+            router.push("/dashboard/library") // Redirect to library after upload
+
+        } catch (error: any) {
+            console.error(error)
+            toast.error(error.message || "Something went wrong")
+        }
     }
 
     return (

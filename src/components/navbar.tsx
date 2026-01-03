@@ -1,8 +1,13 @@
 import Link from "next/link"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/server"
+import { User } from "lucide-react"
 
-export function Navbar() {
+export async function Navbar() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto flex h-14 items-center px-4">
@@ -32,14 +37,29 @@ export function Navbar() {
                         {/* Search placeholder */}
                     </div>
                     <div className="flex items-center gap-2">
-                        <Link href="/login">
-                            <Button variant="ghost" size="sm">
-                                Log in
-                            </Button>
-                        </Link>
-                        <Link href="/signup">
-                            <Button size="sm">Sign Up</Button>
-                        </Link>
+                        {user ? (
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium hidden sm:inline-block">
+                                    {user.email}
+                                </span>
+                                <Link href="/dashboard">
+                                    <Button variant="outline" size="sm">
+                                        <User className="mr-2 h-4 w-4" /> Dashboard
+                                    </Button>
+                                </Link>
+                            </div>
+                        ) : (
+                            <>
+                                <Link href="/login">
+                                    <Button variant="ghost" size="sm">
+                                        Log in
+                                    </Button>
+                                </Link>
+                                <Link href="/signup">
+                                    <Button size="sm">Sign Up</Button>
+                                </Link>
+                            </>
+                        )}
                         <ModeToggle />
                     </div>
                 </div>
