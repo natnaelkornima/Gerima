@@ -56,8 +56,8 @@ export default async function LibraryPage() {
                             <div className="group p-6 border rounded-xl bg-card hover:border-primary transition-colors cursor-pointer h-full flex flex-col">
                                 <div className="flex items-start justify-between mb-4">
                                     {typeIcons[material.type] || <FileText className="h-8 w-8" />}
-                                    <span className="text-xs text-muted-foreground">
-                                        {new Date(material.createdAt).toLocaleDateString()}
+                                    <span className="text-xs text-muted-foreground" suppressHydrationWarning>
+                                        {new Date(material.createdAt).toLocaleDateString("en-US")}
                                     </span>
                                 </div>
                                 <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">

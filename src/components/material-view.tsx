@@ -85,8 +85,8 @@ export function MaterialView({ material, flashcards, quizQuestions }: MaterialVi
                 </Link>
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">{material.title}</h1>
-                    <p className="text-sm text-muted-foreground">
-                        {material.type} • {new Date(material.createdAt).toLocaleDateString()}
+                    <p className="text-sm text-muted-foreground" suppressHydrationWarning>
+                        {material.type} • {new Date(material.createdAt).toLocaleDateString("en-US")}
                     </p>
                 </div>
             </div>
@@ -189,10 +189,10 @@ export function MaterialView({ material, flashcards, quizQuestions }: MaterialVi
                                             key={i}
                                             variant="outline"
                                             className={`justify-start text-left h-auto py-3 px-4 ${showResult && isCorrect
-                                                    ? "border-green-500 bg-green-500/10"
-                                                    : showResult && isSelected && !isCorrect
-                                                        ? "border-red-500 bg-red-500/10"
-                                                        : ""
+                                                ? "border-green-500 bg-green-500/10"
+                                                : showResult && isSelected && !isCorrect
+                                                    ? "border-red-500 bg-red-500/10"
+                                                    : ""
                                                 }`}
                                             onClick={() => handleAnswerSelect(option)}
                                             disabled={showResult}
