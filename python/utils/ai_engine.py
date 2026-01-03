@@ -12,43 +12,44 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 model = genai.GenerativeModel("gemini-flash-latest") # Using flash-latest to ensure match
 
-def generate_study_materials(text: str):
+def generate_study_materials(text: str, generate_type: str = "all"):
     """
-    Sends the extracted text to Gemini and asks for Summary, Quiz, and Flashcards.
+    Sends the extracted text to Gemini and asks for Summary, Quiz, and/or Flashcards.
     """
-    print(f"Generating study materials for text (length: {len(text)})...")
+    print(f"Generating {generate_type} for text (length: {len(text)})...")
+    
+    type_prompts = {
+        "summary": "a concise summary of the text (max 300 words) and key_points.",
+        "quiz": "a 5-question multiple choice quiz with options and correct answers.",
+        "flashcards": "8-10 flashcards (front/back) covering key terms.",
+        "all": "a summary, 5 quiz questions, and 8 flashcards."
+    }
+
+    schema_parts = []
+    if generate_type in ["summary", "all"]:
+        schema_parts.append('"summary": "A concise summary...", "key_points": ["Point 1", ...]')
+    if generate_type in ["quiz", "all"]:
+        schema_parts.append('"quiz": [{"question": "...", "options": ["A", "B", ...], "answer": "Option text"}]')
+    if generate_type in ["flashcards", "all"]:
+        schema_parts.append('"flashcards": [{"front": "...", "back": "..."}]')
+
+    schema_str = ", ".join(schema_parts)
     
     prompt = f"""
-    You are an expert AI tutor.
-    I will provide you with a text from a study material.
-    Your goal is to extract the key information and generate study aids.
+    You are an expert AI tutor. 
+    Analyze the text and provide {type_prompts.get(generate_type, type_prompts["all"])}
     
-    Please output a VALID JSON object with the following structure:
-    {{
-        "summary": "A concise summary of the text (max 300 words).",
-        "key_points": ["Point 1", "Point 2", "Point 3"],
-        "quiz": [
-            {{
-                "question": "Question text?",
-                "options": ["Option A", "Option B", "Option C", "Option D"],
-                "answer": "Option A"
-            }},
-            ... (generate 3-5 questions)
-        ],
-        "flashcards": [
-            {{ "front": "Term", "back": "Definition" }},
-            ... (generate 5-8 flashcards)
-        ]
-    }}
+    Output ONLY a VALID JSON object with this structure:
+    {{ {schema_str} }}
     
-    IMPORTANT: Output ONLY raw JSON. No markdown backticks.
+    IMPORTANT: Output raw JSON only. Do not use markdown backticks.
     
-    TEXT TO ANALYZE:
-    {text[:30000]} 
+    TEXT:
+    {text[:30000]}
     """
     
     try:
-        print("Calling Gemini API...")
+        print(f"Calling Gemini API for {generate_type}...")
         response = model.generate_content(prompt)
         print("Gemini response received.")
         

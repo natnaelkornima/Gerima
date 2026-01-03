@@ -10,6 +10,7 @@ app = FastAPI()
 class ProcessRequest(BaseModel):
     file_url: str
     file_type: str
+    generate_type: str = "all" # summary, quiz, flashcards, or all
 
 @app.get("/")
 def health_check():
@@ -18,45 +19,44 @@ def health_check():
 @app.post("/process")
 def process_file(request: ProcessRequest):
     """
-    Receives a file URL, downloads it, extracts text, and generates study materials via Gemini.
+    Receives a file URL, downloads it, extracts text, and generates requested study material.
     """
-    print(f"Processing file: {request.file_url} ({request.file_type})")
+    print(f"Processing mission: {request.generate_type} for {request.file_url}")
     
     try:
         content = ""
         if request.file_type == "PDF":
             content = extract_text_from_pdf_url(request.file_url)
-        elif request.file_type == "Ref_TEXT" or request.file_type == "Ref_URL":
-            # For now, handle raw text if possible, or assume PDF logic
-             return {"message": "Only PDF supported currently"}
         else:
              return {"message": "File type not supported for text extraction yet."}
 
         if not content:
-             return {"error": "No text extracted from file"}
+             return {"status": "error", "message": "No text extracted from file. The PDF might be scanned or empty."}
 
-        print(f"Extracted {len(content)} characters. Sending to Gemini...")
+        print(f"Extracted {len(content)} chars. Mission: {request.generate_type}")
         
         # Call AI Engine
-        ai_response_json_str = generate_study_materials(content)
-        print(f"DEBUG: AI Response: {ai_response_json_str[:500]}...")
-        
+        try:
+            ai_response_json_str = generate_study_materials(content, request.generate_type)
+        except Exception as ai_e:
+             return {"status": "error", "message": f"AI Engine failed: {str(ai_e)}"}
+
         # Parse JSON
         try:
             ai_data = json.loads(ai_response_json_str)
         except json.JSONDecodeError:
-            print("Failed to parse JSON from AI. Wrapping raw response.")
-            ai_data = {
-                "summary": ai_response_json_str[:500],
-                "quiz": [],
-                "flashcards": []
-            }
+            print("Failed to parse JSON from AI.")
+            # Fallback for summary
+            ai_data = {"summary": ai_response_json_str, "error": "JSON_PARSE_ERROR"}
 
         return {
             "status": "success",
-            "extracted_length": len(content),
+            "type": request.generate_type,
             "ai_data": ai_data
         }
+    except Exception as e:
+        print(f"Server Error: {e}")
+        return {"status": "error", "message": str(e)}
 
     except Exception as e:
         print(f"Error: {e}")
