@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button"
 export default async function TutorPage({
     searchParams
 }: {
-    searchParams: { doc?: string }
+    searchParams: Promise<{ doc?: string }>
 }) {
+    const { doc } = await searchParams
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -21,7 +22,7 @@ export default async function TutorPage({
         orderBy: { updatedAt: 'desc' }
     })
 
-    const selectedDocId = searchParams.doc || (materials.length > 0 ? materials[0].id : "")
+    const selectedDocId = doc || (materials.length > 0 ? materials[0].id : "")
     const selectedDoc = materials.find(m => m.id === selectedDocId)
 
     // Fetch initial history using raw query as fallback while prisma client is locked on Windows
