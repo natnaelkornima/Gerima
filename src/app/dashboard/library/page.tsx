@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
+
+export const dynamic = 'force-dynamic'
 import Link from "next/link"
 import { FileText, FileAudio, FileImage, Presentation, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"

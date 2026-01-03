@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
+
+export const dynamic = 'force-dynamic'
 import { Bot, GraduationCap } from "lucide-react"
 import { ChatTutor } from "@/components/chat-tutor"
 import { TutorSelector } from "@/components/tutor-selector"

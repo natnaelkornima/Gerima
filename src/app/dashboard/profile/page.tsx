@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import prisma from "@/lib/prisma"
+
+export const dynamic = 'force-dynamic'
 import { notFound } from "next/navigation"
 import { User, Shield, Zap, Trophy, Settings as SettingsIcon } from "lucide-react"
 import { ProfileForm } from "./profile-form"
