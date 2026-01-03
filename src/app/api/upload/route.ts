@@ -76,6 +76,23 @@ export async function POST(req: NextRequest) {
             },
         });
 
+        // 6. Trigger AI Processing (Python Microservice)
+        // Fire and forget (or await if we want to block)
+        try {
+            fetch("http://localhost:8000/process", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    file_url: publicUrl,
+                    file_type: mapFileType(file.type),
+                }),
+            }).catch(err => console.error("Failed to trigger Python processing:", err));
+        } catch (e) {
+            console.error("Python Trigger Error:", e);
+        }
+
         return NextResponse.json({ success: true, material: studyMaterial });
 
     } catch (error) {
